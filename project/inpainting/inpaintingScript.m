@@ -14,11 +14,11 @@ omega(31:65,166:194) = 0;
 g = im.*omega;
 
 
-lambda = 1000;
+lambda = 100;
 
-uG = inpainting_Dummy(g,omega,lambda);
+uG = inpainting_MicheleWyss(g,omega,lambda);
 
 figure;
-disp = [uG, 0*im; ...
+disp = [uG, (uG-im).^2; ...
         im, g];
 imshow(disp);
