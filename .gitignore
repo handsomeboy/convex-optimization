@@ -1,0 +1,9 @@
+# LaTex & Editors
+*.log
+*.aux
+*.gz
+*.tps
+
+
+# Matlab
+*.asv
