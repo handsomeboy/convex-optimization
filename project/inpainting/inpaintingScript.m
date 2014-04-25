@@ -14,7 +14,7 @@ omega(31:65,166:194) = 0;
 g = im.*omega;
 
 
-lambda = 100;
+lambda = 1000;
 
 uG = inpainting_MicheleWyss(g,omega,lambda);
 
