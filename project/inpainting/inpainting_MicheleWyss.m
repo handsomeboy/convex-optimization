@@ -4,17 +4,15 @@ function [u] = inpainting_MicheleWyss(g,omega,lambda)
 %        omega: mask
 % lambda: parameter % output: u: inpainted image
 
-alpha = 0.0005;
+alpha = 0.0001;
 delta = 1e-6;
 u = g; % initial guess
 
 iterations = 100000;
 cost = zeros(1,iterations);
+h = waitbar(0,'Iterate...');
 for i = 1:iterations
-   if (mod(i,500) == 0)
-    i
-   end
-   
+   waitbar(i/iterations)   
    %% construct bigger u image with mirrored boundaries
     uNew = zeros(size(u) + [4 4]);
     uNew(3:end-2,3:end-2) = u; % the indices from 3 to end-2 will contain the original image
@@ -52,5 +50,6 @@ for i = 1:iterations
    cost(i) = lambda/2 * sum(sum((omega.*((u-g).^2))))+deriv_for_cost_function;
    
 end
+close(h); 
 plot(cost);
 end
