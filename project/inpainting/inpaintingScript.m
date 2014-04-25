@@ -3,8 +3,8 @@ clear all;
 close all;
 clc;
 
-im = im2single(rgb2gray(imread('hat.jpg')));
-im = imresize(im, [250 215]);
+im = im2single(rgb2gray(imread('Figures/hat.jpg')));
+im = imresize(im, [250 215]); % not needed for grumpycat.jpeg
 % mask
 omega = ones(size(im));
 omega(175:189,11:114) = 0;
@@ -17,7 +17,7 @@ size(omega)
 g = im.*omega;
 
 
-lambda = 10000;
+lambda = 100;
 
 uG = inpainting_MicheleWyss(g,omega,lambda);
 

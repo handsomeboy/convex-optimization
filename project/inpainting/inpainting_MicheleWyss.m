@@ -8,7 +8,7 @@ alpha = 0.0001;
 delta = 1e-6;
 u = g; % initial guess
 
-iterations = 100000;
+iterations = 100;
 cost = zeros(1,iterations);
 h = waitbar(0,'Iterate...');
 for i = 1:iterations
