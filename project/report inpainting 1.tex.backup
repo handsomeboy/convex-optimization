@@ -47,31 +47,32 @@
 %\label{fig:performance}
 %\end{figure}
 
-\section*{Motivation}
+\section*{Inpainting}
+\subsection*{Problem}
+Inpainting is an image processing method that aims for reconstruction of lost or corrupted parts of an image. The goal is to get a plausible-looking image without undefined or invalid pieces.
+
+\subsection*{Motivations}
 Sometimes it's a bad thing that some objects appear in a photograph, e.g. as a tourist I'd like to make a picture of a place but some people are standing around and occlude parts of the actual target image. A simple idea is to just remove the persons after the photograph has been taken. This is a typical example of where an image with holes and invalid regions appears. Image inpainting is one possible approach to generate sensible content for those regions that were occluded before.
 
-\section*{Problem}
-Inpainting is an image processing method that aims for reconstruction of lost or corrupted parts of an image. The goal is to get a plausible-looking image without undefined or invalid pieces. Mathematically, the problem can be formulated by defining a cost function that has to be minimized. 
-\subsection*{Cost function}
-We formulate the following cost function to describe the problem:
+\subsection*{Derivation of gradient}
+Gradient descent is a rather simple iterative approach to minimize a function. Starting at an (randomly chosen)  initial point, the following update rule is performed:
 
-$$E(u) = \frac{\lambda}{2} \|u-g\|_\Omega^2 + \|\nabla u \|_2.$$
-
-Here, the value $u$ that we optimize for is an image with sensible content, $g$ is the input image containing undefined pieces, $\lambda$ is a regularization parameter to control the tradeoff between exactness of fitting and smoothness of the result, and $\Omega$ is a mask that defines the missing data. The goal is to find the argument $u$ that minimizes $E$, thus
-$$\arg \min_u E(u).$$
-
-\subsection*{Minimization -- Gradient descent}
-To minimize the objective function $E$, a simple iterative approach called \emph{gradient descent}. Starting from an (randomly chosen)  initial point, the following update rule is performed:
 \begin{equation}
-\theta_j := \theta_j - \alpha \cdot \frac{\partial}{\partial \theta_j} E(\theta),
+\theta_j := \theta_j - \alpha \cdot \frac{\partial}{\partial \theta_j} J(\theta),
 \label{eq:update-rule}
 \end{equation}
-where $\theta_j$ are the unknown parameters of the model, $\alpha$ is the \emph{learning rate} and $E(\theta)$ is a cost function that is aimed to be minimized, normally called the \emph{objective function}.
+where $\theta_j$ are the unknown parameters of the model, $\alpha$ is the \emph{learning rate} and $J(\theta)$ is a cost function that is aimed to be minimized.
 
-In the case of our above formulated objective function, the update rule will look as follows:
-$$ u[i,j] := u[i,j] - \alpha \cdot \frac{\partial}{\partial u[i,j]} E(u).$$
-\subsection*{Derivation of gradient}
-Clearly, we need to know the partial derivative $\frac{\partial}{\partial u[i,j]} E(u)$ to apply gradient descent. It is given by
+\noindent For our inpainting problem, we formulate the following cost function:
+
+
+$$J(u) = \frac{\lambda}{2} \|u-g\|_\Omega^2 + \|\nabla u \|_2.$$
+
+Here, the value $u$ that we optimize for is an image with sensible content, $g$ is the input image containing undefined pieces, $\lambda$ is a regularization parameter to control the tradeoff between exactness of fitting and smoothness of the result, and $\Omega$ is a mask that defines the corrupted data. The above update rule will then look as follows:
+
+$$ u[i,j] := u[i,j] - \alpha \cdot \frac{\partial}{\partial u[i,j]} J(u).$$
+
+Clearly, we need to know the partial derivative $\frac{\partial}{\partial u[i,j]} J(u)$ to apply gradient descent. It is given by
 
 \begin{align*}
  \frac{\partial}{\partial u[i,j]} \left( \frac{\lambda}{2} \|u-g\|_\Omega^2 + \|\nabla u\|_2 \right) &= \frac{\partial}{\partial u[i,j]} \left( \frac{\lambda}{2} \left(\sum_{i,j} \Omega[i,j] \cdot (u[i,j] - g[i,j])^2\right) + \|\nabla u\|_2 \right) \\
@@ -83,13 +84,13 @@ Clearly, we need to know the partial derivative $\frac{\partial}{\partial u[i,j]
 &= \lambda \cdot \Omega[i,j] \cdot (u[i,j] - g[i,j]) + \frac{\partial}{\partial u[i,j]} \|\nabla u \|_2. 
 \end{align*}
 
-The target image $u$ is descrete and 2-dimensional. Using the forward difference scheme, we can write $\|\nabla u \|_2$ as
+The target image $u$ is 2-dimensional and $\|\nabla u \|_2$ is given by \todo{derive discretization}
 
 \begin{equation} \|\nabla u \|_2 = \sum_{i,j} \underbrace{\sqrt{(u[i+1,j] - u [i,j])^2 + (u[i,j+1] - u[i,j])^2}}_{\tau[i,j]}.
  \label{eq:grad}
 \end{equation}
 
-Because for fixed $i$ and $j$ most of the summation terms in Equation (\ref{eq:grad}) are constant, the exact derivative $\frac{\partial}{\partial u[i,j]} \|\nabla u \|_2$ of the discretized energy reduces to
+Because for fixed $i$ and $j$ most of the summation terms in Equation (\ref{eq:grad}) are constant, the derivative $\frac{\partial}{\partial u[i,j]} \|\nabla u \|_2$ reduces to
 
 $$\frac{\partial}{\partial u[i,j]} \|\nabla u \|_2 = \frac{\partial \tau[i,j]}{\partial u[i,j]} + \frac{\partial \tau[i-1,j]}{\partial u[i,j]} + \frac{\partial \tau[i,j-1]}{\partial u[i,j]}.$$
 
@@ -195,9 +196,8 @@ Another example:
 
 \subsection*{The effect of $\lambda$}
 In the objective function
-$$E(u) = \frac{\lambda}{2} \|u-g\|_\Omega^2 + \|\nabla u \|_2$$
-the parameter $\lambda$ is a \emph{regularization parameter}. It controls the tradeoff between the two constraints of fitting the image and keeping the result smooth. A very low $\lambda$, e.g. $\lambda = 0.1$ leads to an oversmoothed image whereas a very large value for $\lambda$ may possibly fail to reach a nice-looking (smooth) image (see Figure \ref{fig:extreme-lambda-values}). Moreover, a large lambda-value generally requires a smaller learning rate $\alpha$, which can be seen directly by considering the computed final update rule: If $\lambda$ is very large, the first term gets a high weight and may cause the gradient descent method to diverge. Reasonable results can be obtained with $\lambda$-values that lie in between (see Figure \ref{fig:lambda-reasonable}.
-
+$$J(u) = \frac{\lambda}{2} \|u-g\|_\Omega^2 + \|\nabla u \|_2$$
+the parameter $\lambda$ is a \emph{regularization parameter}. It controls the tradeoff between the two constraints of fitting the image and keeping the result smooth. A very low $\lambda$, e.g. $\lambda = 0.1$ leads to an oversmoothed image whereas a very large value for $\lambda$ may possibly fail to reach a nice-looking (smooth) image (see Figure \ref{fig:exreme-lambda-values}). Moreover, a large lambda-value generally requires a smaller learning rate $\alpha$, which can be seen directly by considering the computed final update rule: The first term gets a high weight and may cause the gradient descent method to diverge.
 \begin{figure}[ht]
  \centering
  \begin{subfigure}[h]{0.45\textwidth}
@@ -211,7 +211,7 @@ the parameter $\lambda$ is a \emph{regularization parameter}. It controls the tr
     \includegraphics[width=\textwidth]{hat-iter10000-lambda1990-alpha0_001}
     \caption*{$\lambda = 1'990$, $10'000$ iterations}
  \end{subfigure}
- \caption{Results obtained with extreme values for $\lambda$. Left: low $\lambda$ -- the result is oversmoothed, Right: high $\lambda$; too much structured}
+ \caption{Results obtained with extrem values for $\lambda$. Left: the result is oversmoothed, Right: Overstructured}
  \label{fig:extreme-lambda-values}
 \end{figure}
 \begin{figure}[ht]
@@ -234,11 +234,52 @@ the parameter $\lambda$ is a \emph{regularization parameter}. It controls the tr
     \caption*{$\lambda = 850$}
  \end{subfigure}
  \caption{Better results obtained with reasonable values for $\lambda$.}
- \label{fig:lambda-reasonable}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{subfigure}[h]{0.3\textwidth}
+	\centering
+	\includegraphics[width=\textwidth]{hat-iter1000-lambda0_1-alpha0_001}
+	\caption*{1'000 iterations, $\lambda = 0.1$}
+\end{subfigure}
+~
+\begin{subfigure}[h]{0.3\textwidth}
+	\centering
+	\includegraphics[width=\textwidth]{hat-iter5000-lambda0_1-alpha0_001}
+	\caption*{5'000 iterations, $\lambda = 0.1$}
+\end{subfigure}
+~
+\begin{subfigure}[h]{0.3\textwidth}
+	\centering
+	\includegraphics[width=\textwidth]{hat-iter10000-lambda0_1-alpha0_001}
+	\caption*{$10'000$ iterations, $\lambda = 0.1$}
+\end{subfigure}
+
+\vspace{3mm}
+\begin{subfigure}[h]{0.3\textwidth}
+	\centering
+	\includegraphics[width=\textwidth]{hat-iter5000-lambda10000-alpha0_0001}
+	\caption*{$5'000$ iterations}
+\end{subfigure}
+~
+\begin{subfigure}[h]{0.3\textwidth}
+	\centering
+	\includegraphics[width=\textwidth]{hat-iter10000-lambda10000-alpha0_0001}
+	\caption*{$10'000$ iterations}
+\end{subfigure}
+~
+\begin{subfigure}[h]{0.3\textwidth}
+	\centering
+	\includegraphics[width=\textwidth]{hat-iter100000-lambda10000-alpha0_0001}
+	\caption*{$100'000$ iterations}
+\end{subfigure}
+\caption{Top row: results obtained with $\lambda = 0.1$. Bottom row: results obtained with $\lambda = 10'000$.}
+\label{fig:lambda-values}
 \end{figure}
 
 \subsection*{The optimal $\lambda$}
-Performing 1'000 iterations and using a learning rate of $\alpha = 0.01$, we have the following optimal values for $\lambda$: In the case of the wooly hat the optimal value was $\lambda = 53$, in the grumpy cat example it was $\lambda = 51$ which can be seen from Figure \ref{fig:optimal-lambda-plots} where the vertical axis shows the summed squared distance between the ground truth image and the obtained results.
+Performing 1'000 iterations and with a learning rate of $\alpha = 0.01$ we have the following optimal values for $\lambda$: In the case of the wooly hat the optimal value was $\lambda = 53$, in the grumpycat example it was $\lambda = 51$ which can be seen from Figure \ref{fig:optimal-lambda-plots} where the vertical axis shows the summed squared distance between the ground truth image and the obtained results.
 \begin{figure}[ht]
 \centering
 \begin{subfigure}[h]{0.45\textwidth}
@@ -285,6 +326,39 @@ Performing 1'000 iterations and using a learning rate of $\alpha = 0.01$, we hav
 \caption{Top row: The optimal $\lambda$ leads to reasonable results. Bottom row: The optimal $\lambda$ does not lead to satisfying quality of the resulting image. Choosing a lower learning rate leads to better results. This will, however, also lead to another optimal value for $\lambda$.}
 \label{fig:optimal-lambda-images}
 \end{figure}
+
+
+\begin{enumerate}
+\item \textbf{Derivation of gradient.} In this section you should:
+
+\begin{itemize}
+\item Write the finite difference approximation of the objective function $E$.
+\item Compute the gradient of the objective function $\nabla_uE$.  
+\end{itemize}
+
+
+\item \textbf{Implement gradient descent for inpainting.} In this section you should:
+
+\begin{itemize}
+\item Show some images, as the the gradient method progresses iteration by iteration. Display the initial and the final image and 3 more images in between.
+\end{itemize}
+
+\item \textbf{Show images obtained by very high, very low and optimal $\lambda$.} In this section you should:
+
+\begin{itemize}
+\item Display 3 images with different $\lambda$ (very low, very high and optimal).
+\item Describe the effect of $\lambda$ on the solution.
+\end{itemize}
+
+\item \textbf{ Find optimal $\lambda$.} In this section you should:
+
+\begin{itemize}
+\item Display the $SSD$ vs. $\lambda$ graph.
+\item Describe the effect of $\lambda$ with respect to the $SSD$ between the ground truth and the solution image.
+\end{itemize}
+\end{enumerate}
+
+
  \end{document}
  
  

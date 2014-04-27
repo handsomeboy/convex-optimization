@@ -1,34 +1,40 @@
-function [u] = inpainting_MicheleWyss(g,omega,lambda)
+function [u, cost] = inpainting_MicheleWyss(g,omega,lambda)
 
 % input: g: single gray scaled image
 %        omega: mask
 % lambda: parameter % output: u: inpainted image
 
-alpha = 0.0001;
+alpha = 0.001;
 delta = 1e-6;
 u = g; % initial guess
 
-iterations = 100;
+iterations = 10000;
 cost = zeros(1,iterations);
 h = waitbar(0,'Iterate...');
 for i = 1:iterations
    waitbar(i/iterations)   
    %% construct bigger u image with mirrored boundaries
-    uNew = zeros(size(u) + [4 4]);
-    uNew(3:end-2,3:end-2) = u; % the indices from 3 to end-2 will contain the original image
-
-    uNew(2,3:end-2) = u(2,:);
-    uNew(1,3:end-2) = u(1,:);
-
-    uNew(end-1,3:end-2) = u(end-1,:);
-    uNew(end,3:end-2) = u(end-2,:);
-
-    uNew(:,2) = uNew(:,4);
-    uNew(:,1) = uNew(:,5);
-
-    uNew(:,end-1) = uNew(:,end-3);
-    uNew(:,end) = uNew(:,end-4);
-    
+   
+    flipH = flipdim(u,2);
+    bigH = [flipH(:,end-1:end) u flipH(:,1:2)];
+    flipV = flipdim(bigH,1);
+    uNew = [ flipV(end-1:end,:); bigH; flipV(1:2,:)];
+%     
+%     uNew = zeros(size(u) + [4 4]);
+%     uNew(3:end-2,3:end-2) = u; % the indices from 3 to end-2 will contain the original image
+% 
+%     uNew(2,3:end-2) = u(2,:);
+%     uNew(1,3:end-2) = u(1,:);
+% 
+%     uNew(end-1,3:end-2) = u(end-1,:);
+%     uNew(end,3:end-2) = u(end-2,:);
+% 
+%     uNew(:,2) = uNew(:,4);
+%     uNew(:,1) = uNew(:,5);
+% 
+%     uNew(:,end-1) = uNew(:,end-3);
+%     uNew(:,end) = uNew(:,end-4);
+%     size(uNew)
    %% construct tau based on the enlarged image uNew (big enough s.t. all the necessary indices are available)
    tau = (uNew(3:end,2:end-1) - uNew(2:end-1,2:end-1)).^2 + (uNew(2:end-1,3:end) - uNew(2:end-1,2:end-1)).^2;
    deriv_for_cost_function = sum(sum(tau(2:end-1,2:end-1).^(0.5)));
@@ -51,5 +57,5 @@ for i = 1:iterations
    
 end
 close(h); 
-plot(cost);
+% plot(cost);
 end

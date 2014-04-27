@@ -1,6 +1,6 @@
 
 clear all;
-close all;
+% close all;
 clc;
 
 im = im2single(rgb2gray(imread('Figures/hat.jpg')));
@@ -17,11 +17,27 @@ size(omega)
 g = im.*omega;
 
 
-lambda = 100;
+lambda = 500;
 
-uG = inpainting_MicheleWyss(g,omega,lambda);
+% for lambda = 10:10:1990
+[uG, cost] = inpainting_MicheleWyss(g,omega,lambda);
+% ssd = sum(sum((uG-im).^2));
+%     ssd(lambda) = sum(sum((uG-im).^2));
+%     lambda
+% end
+% vec = [10:10:1990];
+% plot(vec,ssd(10:10:1990));
 
-figure;
-disp = [uG, (uG-im).^2; ...
-        im, g];
-imshow(disp);
+
+% figure;
+% hold on;
+% plot(ssd); title('Grumpy cat'); xlabel('\lambda'); ylabel('SSD');
+% [min,idx] = min(ssd);
+% plot(idx,0:100);
+
+% figure;
+% disp = [uG, (uG-im).^2; ...
+%         im, g];
+% imshow(disp);
+% plot(cost_la);
+imtool(uG)
