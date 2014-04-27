@@ -63,7 +63,7 @@ Here, the value $u$ that we optimize for is an image with sensible content, $g$ 
 $$\arg \min_u E(u).$$
 
 \subsection*{Minimization -- Gradient descent}
-To minimize the objective function $E$, a simple iterative approach called \emph{gradient descent}. Starting from an (randomly chosen)  initial point, the following update rule is performed:
+To minimize the objective function $E$, a simple iterative approach called \emph{gradient descent} is applied. This method proceeds as follows: Starting from an (randomly chosen) initial point, the following update rule is performed:
 \begin{equation}
 \theta_j := \theta_j - \alpha \cdot \frac{\partial}{\partial \theta_j} E(\theta),
 \label{eq:update-rule}
@@ -198,7 +198,7 @@ Another example:
 \subsection*{The effect of $\lambda$}
 In the objective function
 $$E(u) = \frac{\lambda}{2} \|u-g\|_\Omega^2 + \|\nabla u \|_2$$
-the parameter $\lambda$ is a \emph{regularization parameter}. It controls the tradeoff between the two constraints of fitting the image and keeping the result smooth. A very low $\lambda$, e.g. $\lambda = 0.1$ leads to an oversmoothed image whereas a very large value for $\lambda$ may possibly fail to reach a nice-looking (smooth) image (see Figure \ref{fig:extreme-lambda-values}). Moreover, a large lambda-value generally requires a smaller learning rate $\alpha$, which can be seen directly by considering the computed final update rule: If $\lambda$ is very large, the first term gets a high weight and may cause the gradient descent method to diverge. Reasonable results can be obtained with $\lambda$-values that lie in between (see Figure \ref{fig:lambda-reasonable}.
+the parameter $\lambda$ is a \emph{regularization parameter}. It controls the tradeoff between the two constraints of fitting the image and keeping the result smooth. A very low $\lambda$, e.g. $\lambda = 0.1$ leads to an oversmoothed image whereas a very large value for $\lambda$ may possibly fail to reach a nice-looking (smooth) image (see Figure \ref{fig:extreme-lambda-values}). Moreover, a large $\lambda$-value generally requires a smaller learning rate $\alpha$, which can be seen directly by considering the computed final update rule: If $\lambda$ is very large, the first term gets a high weight and may cause the gradient descent method to diverge. Reasonable results can be obtained with $\lambda$-values that lie in between (see Figure \ref{fig:lambda-reasonable}).
 
 \begin{figure}[ht]
  \centering
@@ -213,7 +213,7 @@ the parameter $\lambda$ is a \emph{regularization parameter}. It controls the tr
     \includegraphics[width=\textwidth]{hat-iter10000-lambda1990-alpha0_001}
     \caption*{$\lambda = 1'990$, $10'000$ iterations}
  \end{subfigure}
- \caption{Results obtained with extreme values for $\lambda$. Left: low $\lambda$ -- the result is oversmoothed, Right: high $\lambda$; too much structured}
+ \caption{Results obtained with extreme values for $\lambda$. Left: low $\lambda$; the result is oversmoothed, Right: high $\lambda$; too much structured}
  \label{fig:extreme-lambda-values}
 \end{figure}
 \begin{figure}[ht]
@@ -240,7 +240,7 @@ the parameter $\lambda$ is a \emph{regularization parameter}. It controls the tr
 \end{figure}
 
 \subsection*{The optimal $\lambda$}
-Performing 1'000 iterations and using a learning rate of $\alpha = 0.01$, we have the following optimal values for $\lambda$: In the case of the wooly hat the optimal value was $\lambda = 53$, in the grumpy cat example it was $\lambda = 51$ which can be seen from Figure \ref{fig:optimal-lambda-plots} where the vertical axis shows the summed squared distance between the ground truth image and the obtained results.
+Performing 1'000 iterations and using a learning rate of $\alpha = 0.01$, we have the following optimal values for $\lambda$: In the case of the wooly hat the optimal value was $\lambda = 53$, in the grumpy cat example it was $\lambda = 51$ which can be seen from the plots in Figure \ref{fig:optimal-lambda-plots}. The vertical axis shows the summed squared distance between the ground truth image and the obtained results, on the horizontal axis is $\lambda$.
 \begin{figure}[ht]
 \centering
 \begin{subfigure}[h]{0.45\textwidth}
