@@ -31,11 +31,11 @@
 
 
 
-\title{Assignment 2}
+\title{Image inpainting -- Assignment 2}
 
 
 
-\author{Name Surname\\Matriculation number}
+\author{Mich\`ele Wyss \\10-104-123}
 % //////////////////////////////////////////////////
 
 
@@ -55,11 +55,27 @@
 %\label{fig:performance}
 %\end{figure}
 
-\section*{Inpainting}
+\section{Primal-dual formulation}
+Our objective is to find the image $\tilde u$ that satisfies 
+$$\tilde u = \arg \min_u \frac{\lambda}{2} \|u-g\|_\Omega^2 + \|\nabla u\|_2.$$
+
+\noindent We can reformulate the objective in a more abstract way as follows:
+$$\min_{u}F(Ku) + G(x)$$
+where $K = \nabla$, $F(u) = \|u\|_2$, $G(u) = \frac{\lambda}{2}\|u-g\|_\Omega^2$.
+
+\noindent The primal-dual formulation of this problem is then given by:
+$$\min_u \max_p \langle p,\nabla u \rangle - F^*(x) + \frac{\lambda}{2} \|u-g\|_\Omega^2,$$
+Where the Legendre-Fenchel transform of $F$ can easily be found as follows:
+\begin{align*}
+ F^*(y) = (\|\cdot \|_2)^* (y) &= \sup_x x^Ty - \|x\|_2 \\
+ &= \sup_x x^Ty - \max_{\|z\|_2 \leq 1} x^Tz \\
+ &= \sup_x \min_{\|z\| \leq 1} x^T (y-z) \\
+ &= \begin{cases} 0 ~ \text{if } \|y\| \leq 1, \\ \infty ~ \text{otherwise.} \end{cases}
+\end{align*}
 
 
+\section{To do's}
 \begin{enumerate}
-
 \item Write the Primal-Dual formulation for this problem..
 
 \item Write the explicit expressions for the Primal-Dual steps $y^{n+1} = \text{prox}_{\sigma F^*} (y^n + \sigma K \bar{x}^n)$ and $x^{n+1} = \text{prox}_{\tau G} (x^n  - \tau K^* y^{n+1})$.
