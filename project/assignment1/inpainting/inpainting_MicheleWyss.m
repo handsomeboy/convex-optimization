@@ -34,7 +34,7 @@ for i = 1:iterations
    gradient_term_3 = (uNew(3:end-2,3:end-2) - uNew(3:end-2,2:end-3))./tau(2:end-1,1:end-2);
    
    gradient_term = gradient_term_1 + gradient_term_2 + gradient_term_3;
-
+ 
    %% update u
    u = u - alpha*(lambda * (omega.*(u-g)) + gradient_term);
    
