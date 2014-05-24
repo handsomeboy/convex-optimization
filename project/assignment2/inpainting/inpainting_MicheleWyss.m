@@ -6,35 +6,39 @@ function [u] = inpainting_MicheleWyss(g,omega,lambda)
 % output: u: inpainted image
 
 % initialize
-tau = 0.01;
-sigma = 1/0.09;
+tau = 0.1;
+sigma = 1/0.08;
 
-theta = 0.7;
+theta = 0.5;
 
 x = g;
-y = g;
+y = zeros(size(g,1), size(g,2), 2);
 x_tilde = x;
-debug_pos = 0
+debug_pos = 1
 
 %iterations
-iter = 10000;
+iter = 100;
 h = waitbar(0,'Iterate...');
 for i = 1:iter
    waitbar(i/iter);
    grad_x = makeGradient(x_tilde);
+     
    if (i == debug_pos)
-       imtool(grad_x)
+       imtool(grad_x(:,:,1));
+       imtool(grad_x(:,:,2));
+       imtool(grad_x(:,:,1) + grad_x(:,:,2));
    end
    
    y_term = y + sigma*grad_x;
    
-   norm = sqrt(sum(sum(y_term.^2)));
-   y = (y_term)/max(1, norm);
-    
+   norm = sqrt(y_term(:,:,1).^2 + y_term(:,:,2).^2);
+   y(:,:,1) = y_term(:,:,1)./max(1, norm);
+   y(:,:,2) = y_term(:,:,2)./max(1, norm);
+   
    x_old = x;
-   grad_y = makeDiv(y);
+   div_y = makeDiv(y);
 
-   x = (x + tau*grad_y + tau*lambda*(omega.*g)) ./ (1 + tau*lambda*omega);
+   x = (x + tau*div_y + tau*lambda*(omega.*g)) ./ (1 + tau*lambda*omega);
    if (i == debug_pos)
        diff = abs(x-x_old);
        imtool(diff);
