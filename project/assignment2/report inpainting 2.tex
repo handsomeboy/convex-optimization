@@ -29,7 +29,7 @@
    basicstyle=\small\ttfamily, 
 } 
 
-
+\newcommand{\prox}{\text{prox}}
 
 \title{Image inpainting -- Assignment 2}
 
@@ -56,15 +56,19 @@
 %\end{figure}
 
 \section{Primal-dual formulation}
-Our objective is to find the image $\tilde u$ that satisfies 
-$$\tilde u = \arg \min_u \frac{\lambda}{2} \|u-g\|_\Omega^2 + \|\nabla u\|_2.$$
+\label{sec:primal-dual-formulation}
+Our objective function that we want to minimize is given by 
+$$E(u) = \frac{\lambda}{2} \|u-g\|_\Omega^2 + \|\nabla u\|_2.$$
 
-\noindent We can reformulate the objective in a more abstract way as follows:
-$$\min_{u}F(Ku) + G(x)$$
-where $K = \nabla$, $F(u) = \|u\|_2$, $G(u) = \frac{\lambda}{2}\|u-g\|_\Omega^2$.
-
-\noindent The primal-dual formulation of this problem is then given by:
-$$\min_u \max_p \langle p,\nabla u \rangle - F^*(x) + \frac{\lambda}{2} \|u-g\|_\Omega^2,$$
+In General, given an initial problem
+$$\min_{x \in X}F(Ku) + G(x),$$
+a primal-dual formulation is given by
+\begin{equation}
+\min_{x \in X} \max_{y \in Y} \langle Kx, y \rangle - F^*(y) + G(x). 
+\label{eq:general-primal-dual-formulation}
+\end{equation}
+In the above formulations, $F$ and $G$ are convex and $K$ is a linear operator. Defining $K = \nabla$, $F = \|\cdot\|_2$ and $G(u) = \frac{\lambda}{2}\|u-g\|_\Omega^2$, we can therefore get the following primal-dual formulation:
+$$\min_u \max_p \langle p,\nabla u \rangle - F^*(p) + \frac{\lambda}{2} \|u-g\|_\Omega^2,$$
 Where the Legendre-Fenchel transform of $F$ can easily be found as follows:
 \begin{align*}
  F^*(y) = (\|\cdot \|_2)^* (y) &= \sup_x x^Ty - \|x\|_2 \\
@@ -73,6 +77,76 @@ Where the Legendre-Fenchel transform of $F$ can easily be found as follows:
  &= \begin{cases} 0 ~ \text{if } \|y\| \leq 1, \\ \infty ~ \text{otherwise.} \end{cases}
 \end{align*}
 
+\section{Primal-Dual steps}
+Starting again at our general formulation of the saddle-point problem from equation (\ref{eq:general-primal-dual-formulation}), we want to use the following algorithm, proposed by A. Chambolle and T. Pock  (``Algorithm 1'' in \cite{chambolle2011first}):
+\begin{align*}
+ y^{n+1} &= \prox_{\sigma F^*}(y^n + \sigma K \bar x^n) \\
+ x^{n+1} &= \prox_{\tau G}(x^n - \tau K^* y^{n+1}) \\
+ \bar x^{n+1} &= x^{n+1} + \theta(x^{n+1} - x^n),
+\end{align*}
+where $\theta \in (0,1]$ and $\tau \sigma \|K\|^2 < 1.$ 
+
+The operators ``\prox'' \, are so-called \emph{proximity operators}. They are defined as 
+\begin{equation}\prox_{\lambda F}(x) := \arg\min_z \frac{1}{2} \|x-z\|_2^2 + \lambda F(z)
+\label{eq:def-proximity-operator}
+\end{equation}
+
+\subsection{Find $y^{n+1}$}
+Finding the proximity operator $\prox_{\sigma (\|\cdot\|)*}$ can be done by e.g. using \emph{Moreau's identity} (sometimes also referred to as \emph{Moreaus's theorem}). This theorem states that
+$$\prox_{\lambda F^*}(x) = x - \lambda\, \prox_{\frac{F}{\lambda}}\left(\frac{x}{\lambda}\right).$$
+
+Applying this, we can calculate the proximity operator of the Legendre-Fenchel transform based on the proximity operator of the $l_2$-norm and get
+\begin{align*}
+ \prox_{\sigma F^*}(y^n + \sigma K \bar x^n) &= y^n + \sigma K \bar x^n - \sigma \, \prox_{\frac{F}{\sigma}}\left(\frac{y^n + \sigma K \bar x^n}{\sigma} \right) \\
+ &= (y^n + \sigma K \bar x^n) - \sigma \cdot \frac{y^n + \sigma K \bar x^n}{\sigma} \cdot \max\{0, 1 - \frac{1}{\|y^n + \sigma K \bar x^n\|_2}\} \\
+ &= (y^n + \sigma K \bar x^n) - (y^n + \sigma K \bar x^n) \cdot \max\{0, 1 - \frac{1}{\|y^n + \sigma K \bar x^n\|_2}\}
+\end{align*}
+Here, the second equality follows from the fact that $$\prox_{\frac{\|\cdot\|_2}{\sigma}}(\frac{x}{\sigma}) = \frac{x}{\sigma} \cdot \max\left\{0,1-\frac{1}{\|x\|_2}\right\}.$$
+Let's go step by step and consider the two possible cases of how to compute the wanted proximity operator:
+
+\textbf{Case 1: $\|y^n + \sigma K \bar x^n\| \geq 1.$}
+
+In this case we have 
+\begin{align*}
+ \prox_{\sigma F^*}(y^n + \sigma K \bar x^n) &= (y^n + \sigma K \bar x^n) - (y^n + \sigma K \bar x^n) \cdot \left(1 - \frac{1}{\|y^n + \sigma K \bar x^n\|_2}\right) \\
+ &= y^n + \sigma K \bar x^n - (y^n + \sigma K \bar x^n) + \frac{y^n + \sigma K \bar x^n}{\|y^n + \sigma K \bar x^n\|_2} \\
+ &= \frac{y^n + \sigma K \bar x^n}{\|y^n + \sigma K \bar x^n\|_2}.
+\end{align*}
+
+\textbf{Case 2: $\|y^n + \sigma K \bar x^n\| < 1.$}
+\begin{align*}
+\prox_{\sigma F^*}(y^n + \sigma K \bar x^n) &=  (y^n + \sigma K \bar x^n) - (y^n + \sigma K \bar x^n) \cdot \max\{0, 1 - \frac{1}{\|y^n + \sigma K \bar x^n\|_2}\} \\
+&= (y^n + \sigma K \bar x^n) - (y^n + \sigma K \bar x^n) \cdot 0 \\
+&= (y^n + \sigma K \bar x^n).
+\end{align*}
+
+Merging the two cases together, we can express the proximity operator in a more compact form:
+$$\prox_{\sigma F^*}(y^n + \sigma K \bar x^n) = \frac{y^n + \sigma K \bar x^n}{\max\{1,\|y^n + \sigma K \bar x^n\|_2\}},$$
+and remembering that we set $K = \nabla$, we have the following update rule:
+$$y^{n+1} = \frac{y^n + \sigma \nabla \bar x^n}{\max\{1,\|y^n + \sigma \nabla \bar x^n\|_2\}}.$$
+
+\subsection{Find $x^{n+1}$}
+As opposed to the previous section, we try to find the proximity operator $\prox_{\tau G}(x^n - \tau K^* y^{n+1})$ directly by its definition. Note that $K^*$ is not the Lagrange-Fenchel transform, but simply the \emph{adjoint} operator of $K$. In our case, $K$ is the gradient, and therefore, $K^*$ denotes the divergence. Starting with the definition of a proximity operator given in equation (\ref{eq:def-proximity-operator}), we get 
+\begin{align*}
+ \prox_{\tau G}(x^n - \tau K^* y^{n+1}) = \arg\min_z \underbrace{\frac{1}{2} \|(x^n - \tau K^* y^{n+1})-z\|_2^2 + \tau \, \frac{\lambda}{2} \, \|z-g\|_\Omega^2}_{=: \tilde E(z)}.
+\end{align*}
+We try to find the minimum by setting the derivative with respect to $z$ to zero:
+\begin{align*}
+ \nabla_z \tilde E(z) &= z - (x^n - \tau K^* y^ {n+1}) + \tau \lambda \Omega (z-g) \\
+ &= z - x^n + \tau K^* y^{n+1} + \tau \lambda \Omega (z-g) \\
+ &= z - x^n + \tau K^* y^{n+1} + \tau \lambda \Omega z -\tau \lambda \Omega g \\
+ &= z(1 + \tau \lambda \Omega) - x^n + \tau K^* y^{n+1} - \tau \lambda \Omega g \stackrel{!}{=} 0 \\
+ &\Longleftrightarrow z = \frac{x^n - \tau K^* y^{n+1} + \tau \lambda \Omega g}{1 + \tau \lambda \Omega}.
+\end{align*}
+From this we get the update rule
+$$x^{n+1} = \frac{x^n - \tau \nabla \cdot y^{n+1} + \tau \lambda \Omega g}{1 + \tau \lambda \Omega},$$
+where $\nabla \cdot y^{n+1}$ denotes the divergence of $y^{n+1}$.
+
+\section{Results}
+\section{The effect of $\lambda$}
+\section{Conclusions}
+Whereas the gradient descent method is simple to implement, it might require a huge amount of iterations and a low learning rate to get to a reasonable result. 
+The primal-dual method introduces some additional variables, the dual variables, that made us able to remove coupling of the variable due to the gradient. Thanks to that, the method is remarkably faster than a gradient descent one. However, it also contains some tricky aspects like e.g. finding useful parameters
 
 \section{To do's}
 \begin{enumerate}
@@ -99,6 +173,10 @@ Where the Legendre-Fenchel transform of $F$ can easily be found as follows:
 \end{itemize}
 \end{enumerate}
 
+\bibliographystyle{alphadin}
+\nocite{*}
+
+\bibliography{lit}
  \end{document}
  
  
