@@ -3,6 +3,8 @@
 *.aux
 *.gz
 *.tps
+*.bbl
+*.blg
 
 
 # Matlab
