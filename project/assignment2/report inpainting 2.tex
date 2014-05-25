@@ -15,11 +15,6 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{18pt}
 
-
-
-
-
-
 \usepackage[latin1]{inputenc} 
 \usepackage[T1]{fontenc} 
 
@@ -146,7 +141,10 @@ where $\nabla \cdot y^{n+1}$ denotes the divergence of $y^{n+1}$.
 \section{The effect of $\lambda$}
 \section{Conclusions}
 Whereas the gradient descent method is simple to implement, it might require a huge amount of iterations and a low learning rate to get to a reasonable result. 
-The primal-dual method introduces some additional variables, the dual variables, that made us able to remove coupling of the variable due to the gradient. Thanks to that, the method is remarkably faster than a gradient descent one. However, it also contains some tricky aspects like e.g.\ finding useful parameters $\tau$, $\sigma$ and $\theta$. Also, the theoretical background needed to understand the primal-dual formulations and to understand why the proposed algorithm works, is way more advanced than the theory behind gradient descent.
+The primal-dual method introduces some additional variables, the dual variables, that made us able to remove coupling of the variable due to the gradient. 
+Thanks to that, the method is remarkably faster than a gradient descent one. 
+However, it also contains some tricky aspects like e.g.\ finding useful parameters $\tau$, $\sigma$ and $\theta$. 
+Also, the theoretical background needed to understand the primal-dual formulations and to understand why the proposed algorithm works, is way more advanced than the theory behind gradient descent.
 
 \section{To do's}
 \begin{enumerate}
