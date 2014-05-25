@@ -93,10 +93,10 @@ $$\prox_{\lambda F^*}(x) = x - \lambda\, \prox_{\frac{F}{\lambda}}\left(\frac{x}
 Applying this, we can calculate the proximity operator of the Legendre-Fenchel transform based on the proximity operator of the $l_2$-norm and get
 \begin{align*}
  \prox_{\sigma F^*}(y^n + \sigma K \bar x^n) &= y^n + \sigma K \bar x^n - \sigma \, \prox_{\frac{F}{\sigma}}\left(\frac{y^n + \sigma K \bar x^n}{\sigma} \right) \\
- &= (y^n + \sigma K \bar x^n) - \sigma \cdot \frac{y^n + \sigma K \bar x^n}{\sigma} \cdot \max\{0, 1 - \frac{1}{\|y^n + \sigma K \bar x^n\|_2}\} \\
- &= (y^n + \sigma K \bar x^n) - (y^n + \sigma K \bar x^n) \cdot \max\{0, 1 - \frac{1}{\|y^n + \sigma K \bar x^n\|_2}\}
+ &= (y^n + \sigma K \bar x^n) - \sigma \cdot \frac{y^n + \sigma K \bar x^n}{\sigma} \cdot \max\left\{0, 1 - \frac{1}{\|y^n + \sigma K \bar x^n\|_2}\right\} \\
+ &= (y^n + \sigma K \bar x^n) - (y^n + \sigma K \bar x^n) \cdot \max\left\{0, 1 - \frac{1}{\|y^n + \sigma K \bar x^n\|_2}\right\}
 \end{align*}
-Here, the second equality follows from the fact that $$\prox_{\frac{\|\cdot\|_2}{\sigma}}(\frac{x}{\sigma}) = \frac{x}{\sigma} \cdot \max\left\{0,1-\frac{1}{\|x\|_2}\right\}.$$
+Here, the second equality follows from the fact that $$\prox_{\frac{\|\cdot\|_2}{\sigma}}\left(\frac{x}{\sigma}\right) = \frac{x}{\sigma} \cdot \max\left\{0,1-\frac{1}{\|x\|_2}\right\}.$$
 Let's go step by step and consider the two possible cases of how to compute the wanted proximity operator:
 
 \textbf{Case 1: $\|y^n + \sigma K \bar x^n\| \geq 1.$}
@@ -121,7 +121,7 @@ and remembering that we set $K = \nabla$, we have the following update rule:
 $$y^{n+1} = \frac{y^n + \sigma \nabla \bar x^n}{\max\{1,\|y^n + \sigma \nabla \bar x^n\|_2\}}.$$
 
 \subsection{Find $x^{n+1}$}
-As opposed to the previous section, we try to find the proximity operator $\prox_{\tau G}(x^n - \tau K^* y^{n+1})$ directly by its definition. Note that $K^*$ is not the Lagrange-Fenchel transform, but simply the \emph{adjoint} operator of $K$. In our case, $K$ is the gradient, and therefore, $K^*$ denotes the divergence. Starting with the definition of a proximity operator given in equation (\ref{eq:def-proximity-operator}), we get 
+As opposed to the previous section, we try to find the proximity operator $\prox_{\tau G}(x^n - \tau K^* y^{n+1})$ directly by its definition. Note that $K^*$ is not the Lagrange-Fenchel transform, but simply the \emph{adjoint} operator of $K$. In our case, $K$ is the gradient, and therefore, $K^*$ is the negative of the divergence, $K^* = - \text{div}$. Starting with the definition of a proximity operator given in equation (\ref{eq:def-proximity-operator}), we get 
 \begin{align*}
  \prox_{\tau G}(x^n - \tau K^* y^{n+1}) = \arg\min_z \underbrace{\frac{1}{2} \|(x^n - \tau K^* y^{n+1})-z\|_2^2 + \tau \, \frac{\lambda}{2} \, \|z-g\|_\Omega^2}_{=: \tilde E(z)}.
 \end{align*}
@@ -134,10 +134,11 @@ We try to find the minimum by setting the derivative with respect to $z$ to zero
  &\Longleftrightarrow z = \frac{x^n - \tau K^* y^{n+1} + \tau \lambda \Omega g}{1 + \tau \lambda \Omega}.
 \end{align*}
 From this we get the update rule
-$$x^{n+1} = \frac{x^n - \tau \nabla \cdot y^{n+1} + \tau \lambda \Omega g}{1 + \tau \lambda \Omega},$$
+$$x^{n+1} = \frac{x^n + \tau \nabla \cdot y^{n+1} + \tau \lambda \Omega g}{1 + \tau \lambda \Omega},$$
 where $\nabla \cdot y^{n+1}$ denotes the divergence of $y^{n+1}$.
 
 \section{Results}
+
 \section{The effect of $\lambda$}
 \section{Conclusions}
 Whereas the gradient descent method is simple to implement, it might require a huge amount of iterations and a low learning rate to get to a reasonable result. 
