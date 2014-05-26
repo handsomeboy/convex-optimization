@@ -16,7 +16,7 @@ y = ones([size(g) 2]);
 x_tilde = x;
 
 % iterate
-iter = 2000;
+iter = 1000;
 h = waitbar(0,'Iterate...');
 cost = zeros(iter,1);
 for i = 1:iter
@@ -44,9 +44,9 @@ for i = 1:iter
 
    % compute cost function (calculate ||grad(x_tilde)|| according to report of
    % assignment 1
-   total_var = (x_tilde([2:end end],1:end) - x_tilde(1:end,1:end)).^2 + (x(1:end,[2:end end]) - x(1:end,1:end)).^2;
-   deriv_for_cost_function = sum(sum(total_var.^(0.5)));
-   cost(i) = lambda/2 * sum(sum((omega.*((x_tilde-g).^2))))+deriv_for_cost_function;
+    total_var = (x_tilde([2:end end],1:end) - x_tilde(1:end,1:end)).^2 + (x(1:end,[2:end end]) - x(1:end,1:end)).^2;
+    deriv_for_cost_function = sum(sum(total_var.^(0.5)));
+    cost(i) = lambda/2 * sum(sum((omega.*((x_tilde-g).^2))))+deriv_for_cost_function;
 end
 close(h);
 plot(cost);

@@ -14,9 +14,11 @@ omega(31:65,166:194) = 0;
 g = im.*omega;
 
 
-lambda = 100;
+lambda = 1000;
 
 uG = inpainting_MicheleWyss(g,omega,lambda);
+ssd = sum(sum((uG - im).^2));
+
 diff = (im - uG).^2 * 10;
 figure;
 disp = [uG, diff; ...
